@@ -1,0 +1,59 @@
+{
+    "dataset": {
+        "rows": 541909,
+        "columns": 8
+    },
+    "issues": [
+        {
+            "type": "missing_values",
+            "column": "Description",
+            "count": 1454,
+            "ratio": 0.0027,
+            "severity": "medium"
+        },
+        {
+            "type": "missing_values",
+            "column": "CustomerID",
+            "count": 135080,
+            "ratio": 0.2493,
+            "severity": "medium"
+        },
+        {
+            "type": "duplicate_rows",
+            "count": 5268,
+            "ratio": 0.0097,
+            "severity": "medium"
+        },
+        {
+            "type": "numeric_outliers",
+            "column": "Quantity",
+            "count": 58619,
+            "ratio": 0.1082,
+            "lower_bound": -12.5,
+            "upper_bound": 23.5,
+            "severity": "high"
+        },
+        {
+            "type": "numeric_outliers",
+            "column": "UnitPrice",
+            "count": 39627,
+            "ratio": 0.0731,
+            "lower_bound": -3.0700000000000003,
+            "upper_bound": 8.45,
+            "severity": "high"
+        },
+        {
+            "type": "invalid_values",
+            "column": "UnitPrice",
+            "condition": "UnitPrice < 0",
+            "count": 2,
+            "severity": "high"
+        }
+    ],
+    "summary": {
+        "total_issues": 6,
+        "high": 3,
+        "medium": 3,
+        "low": 0
+    }
+}

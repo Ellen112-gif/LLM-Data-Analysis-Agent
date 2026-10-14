@@ -1,0 +1,99 @@
+{
+    "shape": {
+        "rows": 541909,
+        "columns": 8
+    },
+    "columns": {
+        "InvoiceNo": {
+            "dtype": "object",
+            "missing": 0,
+            "unique": 25900,
+            "unique_ratio": 0.0478
+        },
+        "StockCode": {
+            "dtype": "object",
+            "missing": 0,
+            "unique": 4070,
+            "unique_ratio": 0.0075
+        },
+        "Description": {
+            "dtype": "object",
+            "missing": 1454,
+            "unique": 4223,
+            "unique_ratio": 0.0078
+        },
+        "Quantity": {
+            "dtype": "int64",
+            "missing": 0,
+            "unique": 722,
+            "unique_ratio": 0.0013
+        },
+        "InvoiceDate": {
+            "dtype": "datetime64[us]",
+            "missing": 0,
+            "unique": 23260,
+            "unique_ratio": 0.0429
+        },
+        "UnitPrice": {
+            "dtype": "float64",
+            "missing": 0,
+            "unique": 1630,
+            "unique_ratio": 0.003
+        },
+        "CustomerID": {
+            "dtype": "float64",
+            "missing": 135080,
+            "unique": 4372,
+            "unique_ratio": 0.0081
+        },
+        "Country": {
+            "dtype": "str",
+            "missing": 0,
+            "unique": 38,
+            "unique_ratio": 0.0001
+        }
+    },
+    "missing_values": {
+        "InvoiceNo": 0,
+        "StockCode": 0,
+        "Description": 1454,
+        "Quantity": 0,
+        "InvoiceDate": 0,
+        "UnitPrice": 0,
+        "CustomerID": 135080,
+        "Country": 0
+    },
+    "duplicate_rows": 5268,
+    "numeric_summary": {
+        "Quantity": {
+            "count": 541909.0,
+            "mean": 9.55224954743324,
+            "std": 218.08115785023386,
+            "min": -80995.0,
+            "25%": 1.0,
+            "50%": 3.0,
+            "75%": 10.0,
+            "max": 80995.0
+        },
+        "UnitPrice": {
+            "count": 541909.0,
+            "mean": 4.611113626088514,
+            "std": 96.75985306117937,
+            "min": -11062.06,
+            "25%": 1.25,
+            "50%": 2.08,
+            "75%": 4.13,
+            "max": 38970.0
+        },
+        "CustomerID": {
+            "count": 406829.0,
+            "mean": 15287.690570239585,
+            "std": 1713.600303321598,
+            "min": 12346.0,
+            "25%": 13953.0,
+            "50%": 15152.0,
+            "75%": 16791.0,
+            "max": 18287.0
+        }
+    }
+}
