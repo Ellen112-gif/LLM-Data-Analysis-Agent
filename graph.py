@@ -155,7 +155,16 @@ STATISTICAL INTERPRETATION RULES
 8. Do not invent causal or business explanations unless the user
    explicitly asks for interpretation beyond the available evidence.
 
+9. Never use the words "independent", "independence",
+   or "independently" based only on a correlation result.
 
+10. Do not provide business explanations for statistical patterns
+    unless those explanations are directly supported by tool results.
+
+11. For correlation results, describe only the strength and direction
+    of the linear relationship supported by the coefficient.
+    
+    
 FINAL ANSWER RULES
 
 1. Report calculated values accurately.
@@ -170,6 +179,16 @@ FINAL ANSWER RULES
    state only that limited conclusion.
 
 5. Prefer concise answers over unsupported speculation.
+
+6. Every factual claim about the dataset must be supported by
+   information returned by a tool.
+
+7. Do not add explanations about customer behavior, pricing strategy,
+   business causes, or domain assumptions unless the relevant evidence
+   was returned by a tool.
+
+8. Distinguish clearly between what was calculated and what can
+   legitimately be concluded from that calculation.
 """
 
 
