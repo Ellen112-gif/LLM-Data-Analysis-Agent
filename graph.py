@@ -1,13 +1,22 @@
-
 import os
 import pandas as pd
 
 from dotenv import load_dotenv
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.graph import StateGraph, MessagesState, START, END
-from langgraph.prebuilt import ToolNode, tools_condition
+from langchain_core.messages import (
+    HumanMessage,
+    SystemMessage,
+)
+from langgraph.graph import (
+    StateGraph,
+    MessagesState,
+    START,
+)
+from langgraph.prebuilt import (
+    ToolNode,
+    tools_condition,
+)
 
 from src.tools.sql_tool import SQLTool
 from src.tools.statistics_tool import StatisticsTool
@@ -25,9 +34,13 @@ load_dotenv()
 # 2. Load dataset
 # ============================================================
 
-df = pd.read_excel("data/raw/Online Retail.xlsx")
+df = pd.read_excel(
+    "data/raw/Online Retail.xlsx"
+)
 
-print(f"Dataset loaded: {df.shape}")
+print(
+    f"Dataset loaded: {df.shape}"
+)
 
 
 # ============================================================
@@ -50,7 +63,9 @@ tools = create_agent_tools(
 
 llm = ChatOpenAI(
     model="Qwen/Qwen3.5-4B",
-    api_key=os.getenv("SILICONFLOW_API_KEY"),
+    api_key=os.getenv(
+        "SILICONFLOW_API_KEY"
+    ),
     base_url="https://api.siliconflow.cn/v1"
 )
 
@@ -80,7 +95,7 @@ SQLite
 Table name:
 data
 
-Columns:
+Available columns:
 - InvoiceNo
 - StockCode
 - Description
@@ -91,10 +106,48 @@ Columns:
 - Country
 
 
+IMPORTANT SCHEMA RULE
+
+Before using any tool, check whether the user's requested
+information can be answered using the available columns.
+
+The dataset DOES NOT contain:
+
+- Salary
+- Age
+- Gender
+- Income
+- Address
+- Phone
+- Email
+
+If the user asks about a field that does not exist in the dataset:
+
+1. Do NOT call run_sql.
+2. Do NOT call any other tool.
+3. Clearly explain that the requested information is not
+   available in the dataset.
+4. Do not invent or estimate the missing information.
+
+For example:
+
+User:
+"What is the average salary of customers?"
+
+Correct behavior:
+
+Do not call a tool.
+
+Answer:
+"The dataset does not contain a salary column,
+so the average customer salary cannot be calculated
+from this dataset."
+
+
 TOOL USAGE RULES
 
-1. Use tools whenever the user asks for information that requires
-   querying or calculating values from the dataset.
+1. Use tools whenever the user's question requires
+   information or calculations from the dataset.
 
 2. Use run_sql for:
    - counting
@@ -104,20 +157,34 @@ TOOL USAGE RULES
    - sorting
    - SQL-based analysis
 
-3. Use calculate_correlation when the user asks for correlation
-   between two numerical columns.
+3. Use describe_column when the user asks for descriptive
+   statistics of a numeric column, such as:
+   - count
+   - mean
+   - average
+   - median
+   - standard deviation
+   - minimum
+   - maximum
+   - quartiles
 
-4. Generate SQLite-compatible SQL only.
+4. Use calculate_correlation when the user asks about
+   correlation or linear relationship between two numerical
+   columns.
 
-5. Do not use:
+5. Generate SQLite-compatible SQL only.
+
+6. Do not use:
    - information_schema
    - FORMAT ROWS
-   - SQL syntax specific to PostgreSQL, MySQL, or other databases.
+   - PostgreSQL-specific syntax
+   - MySQL-specific syntax
+   - other database-specific syntax
 
-6. If a tool returns an error, inspect the error and correct
+7. If a tool returns an error, inspect the error and correct
    the next tool call.
 
-7. Stop calling tools when enough information is available.
+8. Stop calling tools when enough information is available.
 
 
 NUMERICAL ACCURACY RULES
@@ -130,7 +197,8 @@ NUMERICAL ACCURACY RULES
 
 4. When rounding numbers, preserve the original sign.
 
-5. Do not invent numerical values that were not returned by a tool.
+5. Do not invent numerical values that were not returned
+   by a tool.
 
 
 STATISTICAL INTERPRETATION RULES
@@ -141,30 +209,35 @@ STATISTICAL INTERPRETATION RULES
 
 3. Correlation does not imply causation.
 
-4. A correlation coefficient close to zero means there is little
-   or no LINEAR relationship between the variables.
+4. A correlation coefficient close to zero means there is
+   little or no LINEAR relationship between the variables.
 
-5. A correlation close to zero does NOT prove statistical independence.
+5. A correlation close to zero does NOT prove statistical
+   independence.
 
-6. Never describe two variables as "independent" based only on
-   a correlation coefficient.
+6. Never describe two variables as "independent" based only
+   on a correlation coefficient.
 
-7. Do not claim statistical significance or non-significance unless
-   an appropriate statistical significance test has been performed.
+7. Do not claim statistical significance or non-significance
+   unless an appropriate statistical significance test has
+   been performed.
 
-8. Do not invent causal or business explanations unless the user
-   explicitly asks for interpretation beyond the available evidence.
+8. Do not invent causal or business explanations unless
+   the user explicitly asks for interpretation beyond the
+   available evidence.
 
 9. Never use the words "independent", "independence",
    or "independently" based only on a correlation result.
 
-10. Do not provide business explanations for statistical patterns
-    unless those explanations are directly supported by tool results.
+10. Do not provide business explanations for statistical
+    patterns unless those explanations are directly supported
+    by tool results.
 
-11. For correlation results, describe only the strength and direction
-    of the linear relationship supported by the coefficient.
-    
-    
+11. For correlation results, describe only the strength and
+    direction of the linear relationship supported by the
+    coefficient.
+
+
 FINAL ANSWER RULES
 
 1. Report calculated values accurately.
@@ -183,12 +256,20 @@ FINAL ANSWER RULES
 6. Every factual claim about the dataset must be supported by
    information returned by a tool.
 
-7. Do not add explanations about customer behavior, pricing strategy,
-   business causes, or domain assumptions unless the relevant evidence
-   was returned by a tool.
+7. Do not add explanations about customer behavior, pricing
+   strategy, business causes, or domain assumptions unless
+   the relevant evidence was returned by a tool.
 
-8. Distinguish clearly between what was calculated and what can
-   legitimately be concluded from that calculation.
+8. Distinguish clearly between what was calculated and what
+   can legitimately be concluded from that calculation.
+
+9. After receiving a tool result, ALWAYS provide a final
+   natural-language answer to the user.
+
+10. Never finish with an empty response.
+
+11. If a tool returns a successful result, summarize the
+    relevant result clearly and directly.
 """
 
 
@@ -201,12 +282,22 @@ def agent_node(state: MessagesState):
     messages = state["messages"]
 
     # Add system prompt before the conversation
-    if not messages or not isinstance(messages[0], SystemMessage):
+    if (
+        not messages
+        or not isinstance(
+            messages[0],
+            SystemMessage
+        )
+    ):
         messages = [
-            SystemMessage(content=system_prompt)
+            SystemMessage(
+                content=system_prompt
+            )
         ] + messages
 
-    response = llm_with_tools.invoke(messages)
+    response = llm_with_tools.invoke(
+        messages
+    )
 
     return {
         "messages": [response]
@@ -224,16 +315,28 @@ tool_node = ToolNode(tools)
 # 9. Build LangGraph
 # ============================================================
 
-builder = StateGraph(MessagesState)
+builder = StateGraph(
+    MessagesState
+)
 
 
 # Add nodes
-builder.add_node("agent", agent_node)
-builder.add_node("tools", tool_node)
+builder.add_node(
+    "agent",
+    agent_node
+)
+
+builder.add_node(
+    "tools",
+    tool_node
+)
 
 
 # START → Agent
-builder.add_edge(START, "agent")
+builder.add_edge(
+    START,
+    "agent"
+)
 
 
 # Agent → Tools or END
@@ -244,7 +347,10 @@ builder.add_conditional_edges(
 
 
 # Tools → Agent
-builder.add_edge("tools", "agent")
+builder.add_edge(
+    "tools",
+    "agent"
+)
 
 
 # Compile graph
@@ -255,47 +361,81 @@ graph = builder.compile()
 # 10. Run the Agent
 # ============================================================
 
-
 if __name__ == "__main__":
 
     user_question = input(
         "\nAsk a question about the dataset: "
     )
 
-    print("\n========== START GRAPH ==========\n")
+    print(
+        "\n========== START GRAPH ==========\n"
+    )
 
     result = graph.invoke(
         {
             "messages": [
-                HumanMessage(content=user_question)
+                HumanMessage(
+                    content=user_question
+                )
             ]
         }
     )
 
-    print("\n========== ALL MESSAGES ==========\n")
+    print(
+        "\n========== ALL MESSAGES ==========\n"
+    )
 
-    for i, message in enumerate(result["messages"]):
+    for i, message in enumerate(
+        result["messages"]
+    ):
 
-        print(f"\n----- Message {i} -----")
+        print(
+            f"\n----- Message {i} -----"
+        )
 
-        print("Type:", type(message).__name__)
+        print(
+            "Type:",
+            type(message).__name__
+        )
 
         print("Content:")
         print(message.content)
 
-        if hasattr(message, "tool_calls"):
-            print("Tool Calls:")
-            print(message.tool_calls)
+        if hasattr(
+            message,
+            "tool_calls"
+        ):
 
-    print("\n========== FINAL ANSWER ==========\n")
+            print(
+                "Tool Calls:"
+            )
 
-    final_message = result["messages"][-1]
+            print(
+                message.tool_calls
+            )
 
-    print("Final message type:")
-    print(type(final_message).__name__)
+    print(
+        "\n========== FINAL ANSWER ==========\n"
+    )
 
-    print("\nFinal message content:")
-    print(final_message.content)
+    final_message = (
+        result["messages"][-1]
+    )
+
+    print(
+        "Final message type:"
+    )
+
+    print(
+        type(final_message).__name__
+    )
+
+    print(
+        "\nFinal message content:"
+    )
+
+    print(
+        final_message.content
+    )
 
     sql_tool.close()
-

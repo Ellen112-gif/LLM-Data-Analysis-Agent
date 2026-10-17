@@ -20,7 +20,6 @@ def create_agent_tools(sql_tool, statistics_tool):
 
         return sql_tool.run(query)
 
-
     @tool
     def calculate_correlation(
         column_x: str,
@@ -40,8 +39,21 @@ def create_agent_tools(sql_tool, statistics_tool):
             column_y
         )
 
+    @tool
+    def describe_column(column: str) -> dict:
+        """
+        Return descriptive statistics for a numeric column.
+
+        Use this tool when the user asks for
+        descriptive statistics such as count, mean,
+        median, standard deviation, minimum,
+        quartiles, or maximum.
+        """
+
+        return statistics_tool.describe(column)
 
     return [
         run_sql,
-        calculate_correlation
+        calculate_correlation,
+        describe_column
     ]

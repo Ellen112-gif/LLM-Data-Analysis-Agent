@@ -11,7 +11,7 @@ The agent uses **LangChain + LangGraph** to understand natural-language question
 - **Statistical Analysis** — descriptive statistics and correlation analysis
 - **LangGraph Agent** — tool execution and multi-step reasoning workflow
 - **Tool Error Handling** — handles tool execution failures and returns errors to the agent
-- **Routing Test** — verifies whether questions are routed to the expected tools
+- **Agent Evaluation** — evaluates tool routing and final answer correctness
 - **FastAPI Backend** — exposes the agent through REST APIs
 - **Data Quality Profiling** — checks missing values, duplicates, outliers and other data issues
 
@@ -30,7 +30,9 @@ LangGraph Agent
   │
   ├── Statistics Tool
   │
-  └── Correlation Tool
+  ├── Correlation Tool
+  │
+  └── Describe Column Tool
   │
   ▼
 Tool Result
@@ -49,15 +51,17 @@ The project uses the **Online Retail** dataset.
 - Rows: **541,909**
 - Columns: **8**
 - Format: Excel
-- Main fields:
-  - InvoiceNo
-  - StockCode
-  - Description
-  - Quantity
-  - InvoiceDate
-  - UnitPrice
-  - CustomerID
-  - Country
+
+Main fields:
+
+- InvoiceNo
+- StockCode
+- Description
+- Quantity
+- InvoiceDate
+- UnitPrice
+- CustomerID
+- Country
 
 The dataset is loaded into Pandas and can also be queried through an in-memory SQLite database.
 
@@ -79,6 +83,10 @@ What is the average UnitPrice?
 
 ```text
 What is the correlation between Quantity and UnitPrice?
+```
+
+```text
+Which country has the highest average Quantity per transaction?
 ```
 
 The agent automatically determines which tool should be used.
@@ -115,37 +123,37 @@ Example response:
 }
 ```
 
-Interactive API documentation is available at:
+Interactive API documentation:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-## Agent Routing Test
+## Agent Evaluation
 
-The project includes an initial routing smoke test covering:
+The project includes an evaluation suite covering:
 
-- SQL row counting
-- SQL aggregation
+- SQL analysis
+- Statistical analysis
 - Correlation analysis
-- Average calculation
-- Grouped aggregation
+- Numerical answer validation
+- Tool routing
+- Unsupported questions
 
-Current result:
+Current evaluation result:
 
 ```text
-Passed: 5
-Failed: 0
-Total: 5
+Total Tests: 10
 Routing Accuracy: 100.0%
+Answer Accuracy: 100.0%
+Overall Accuracy: 100.0%
+Errors: 0
 ```
 
-This is an initial smoke test rather than a comprehensive agent evaluation.
-
-Run the test with:
+Run the evaluation with:
 
 ```bash
-python -m tests.test_agent_routing
+python -m tests.test_agent_evaluation
 ```
 
 ## Project Structure
@@ -161,12 +169,20 @@ LLM-Data-Analysis-Agent/
 │   ├── profile.json
 │   └── quality_report.json
 │
-├── tools/
-│   ├── sql_tool.py
-│   ├── statistics_tool.py
-│   └── agent_tools.py
+├── src/
+│   ├── profiler/
+│   │   └── data_profiler.py
+│   │
+│   ├── quality/
+│   │   └── quality_checker.py
+│   │
+│   └── tools/
+│       ├── sql_tool.py
+│       ├── statistics_tool.py
+│       └── agent_tools.py
 │
 ├── tests/
+│   ├── test_agent_evaluation.py
 │   └── test_agent_routing.py
 │
 ├── graph.py
@@ -207,17 +223,20 @@ Do not commit `.env` to GitHub.
 - [x] Data quality analysis
 - [x] SQL analysis tool
 - [x] Statistical analysis tool
+- [x] Correlation analysis
+- [x] Descriptive statistics
 - [x] LLM tool calling
 - [x] Automatic tool selection
 - [x] LangGraph agent workflow
 - [x] Tool error handling
-- [x] Routing smoke test
+- [x] Agent evaluation
 - [x] FastAPI backend
 - [x] API validation and error handling
 
 ## Roadmap
 
-- [ ] Comprehensive agent evaluation
 - [ ] Docker deployment
 - [ ] Web chat interface
 - [ ] Performance and reliability improvements
+```
+
